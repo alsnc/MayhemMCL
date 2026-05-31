@@ -9,7 +9,8 @@
 #include "lemlib/chassis/odom.hpp"
 #include "lemlib/chassis/chassis.hpp"
 #include "lemlib/chassis/trackingWheel.hpp"
-
+#include <random>
+#include "Particle.h"
 // tracking thread
 pros::Task* trackingTask = nullptr;
 
@@ -20,6 +21,9 @@ lemlib::Pose odomPose(0, 0, 0); // the pose of the robot
 lemlib::Pose odomSpeed(0, 0, 0); // the speed of the robot
 lemlib::Pose odomLocalSpeed(0, 0, 0); // the local speed of the robot
 
+Particle particles[400]; // array to hold particles
+
+int particleNumber = 100; 
 float prevVertical = 0;
 float prevVertical1 = 0;
 float prevVertical2 = 0;
@@ -41,7 +45,32 @@ lemlib::Pose lemlib::getPose(bool radians) {
 void lemlib::setPose(lemlib::Pose pose, bool radians) {
     if (radians) odomPose = pose;
     else odomPose = lemlib::Pose(pose.x, pose.y, degToRad(pose.theta));
+    lemlib::setPoseWithNoise(lemlib::Pose(odomPose.x, odomPose.y, odomPose.theta));
 }
+
+//create particles around it 
+void lemlib::setPoseWithNoise(lemlib::Pose pose) {
+    for (int i =0; i < particleNumber; i++) {
+        //figuring out the range the noise should be in 
+        std::random_device rd;
+        std::mt19937 gen(rd());
+
+        //NOTE: you can use normal here 
+        std::uniform_real_distribution<> distr(0.1, 1.5);
+        double random = distr(gen);
+
+        double newX = pose.x += random; // add random noise to x position
+        double newY = pose.y += random; // add random noise to y position
+
+        //create a new particle with the new position and equal weight
+        Particle* p = new Particle(newX, newY, pose.theta, 1.0/particleNumber); 
+
+        //add the particle to the array of particles
+        particles[i] = *p;
+
+    }
+}
+
 
 lemlib::Pose lemlib::getSpeed(bool radians) {
     if (radians) return odomSpeed;

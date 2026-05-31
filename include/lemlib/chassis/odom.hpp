@@ -31,6 +31,9 @@ void setPose(Pose pose, bool radians = false);
  * @param radians true for theta in radians, false for degrees. False by default
  * @return lemlib::Pose
  */
+
+void setPoseWithNoise(lemlib::Pose pose);
+
 Pose getSpeed(bool radians = false);
 /**
  * @brief Get the local speed of the robot

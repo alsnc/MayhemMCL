@@ -451,6 +451,7 @@ class Chassis {
          * std::cout << "traveled 45 degrees" << std::endl;
          * @endcode
          */
+
         void waitUntil(float dist);
         /**
          * @brief Wait until the robot has completed the path
