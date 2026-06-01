@@ -137,7 +137,7 @@ void autonomous() {
 
     chassis.setPose(48,-48,0);
 
-    
+    chassis.moveToPoint(48, -24, 4000);
 
 
 

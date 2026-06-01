@@ -21,7 +21,7 @@ lemlib::Pose odomPose(0, 0, 0); // the pose of the robot
 lemlib::Pose odomSpeed(0, 0, 0); // the speed of the robot
 lemlib::Pose odomLocalSpeed(0, 0, 0); // the local speed of the robot
 
-Particle particles[400]; // array to hold particles
+
 
 int particleNumber = 100; 
 float prevVertical = 0;
@@ -31,6 +31,8 @@ float prevHorizontal = 0;
 float prevHorizontal1 = 0;
 float prevHorizontal2 = 0;
 float prevImu = 0;
+
+Particle particles[100]; // array to hold particles
 
 void lemlib::setSensors(lemlib::OdomSensors sensors, lemlib::Drivetrain drivetrain) {
     odomSensors = sensors;
@@ -67,7 +69,6 @@ void lemlib::setPoseWithNoise(lemlib::Pose pose) {
 
         //add the particle to the array of particles
         particles[i] = *p;
-
     }
 }
 
@@ -193,12 +194,37 @@ void lemlib::update() {
     // save previous pose
     lemlib::Pose prevPose = odomPose;
 
+    //MOTION UPDATE
+    double changeX = (localY * sin(avgHeading) + localX * -cos(avgHeading));
+    double changeY = (localY * cos(avgHeading) + localX * sin(avgHeading));
+
+    for (int i =0; i < particleNumber; i++) {
+        //get the current particle
+        Particle p = particles[i];
+
+        //update the particle's position based on the change in x and y
+        double newX = p.x + changeX;
+        double newY = p.y + changeY;
+
+        //NOTE: change how this randomness is done because it's a bit complicated & muy importante
+        //otherwordly powers
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<> distr(0.1, 1.0);
+        double random = distr(gen);
+        newX = newX += random; // add random noise to x position
+
+    }
+
+
     // calculate global x and y
-    odomPose.x += localY * sin(avgHeading);
-    odomPose.y += localY * cos(avgHeading);
-    odomPose.x += localX * -cos(avgHeading);
-    odomPose.y += localX * sin(avgHeading);
-    odomPose.theta = heading;
+
+    // odomPose.x += localY * sin(avgHeading);
+    // odomPose.y += localY * cos(avgHeading);
+    // odomPose.x += localX * -cos(avgHeading);
+    // odomPose.y += localX * sin(avgHeading);
+    // odomPose.theta = heading;
+
 
     // calculate speed
     odomSpeed.x = ema((odomPose.x - prevPose.x) / 0.01, odomSpeed.x, 0.95);
