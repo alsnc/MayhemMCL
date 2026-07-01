@@ -1,5 +1,6 @@
 #include "main.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
+#include "pros/distance.hpp"
 
 // controller
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
@@ -21,6 +22,13 @@ pros::Rotation verticalEnc(-11);
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_275, -5.75);
 // vertical tracking wheel. 2.75" diameter, 2.5" offset, left of the robot (negative)
 lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, -2.5);
+
+//distance sensors 
+pros::Distance leftSensor(19); 
+pros::Distance rightSensor(18);
+pros::Distance frontSensor(17);
+pros::Distance backSensor(16);
+
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&leftMotors, // left motor group

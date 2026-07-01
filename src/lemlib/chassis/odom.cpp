@@ -11,6 +11,12 @@
 #include "lemlib/chassis/trackingWheel.hpp"
 #include <random>
 #include "Particle.h"
+#include <random>
+#include "main.h"
+//FOR GEN 
+std::random_device rd;
+std::mt19937 gen(rd());
+
 // tracking thread
 pros::Task* trackingTask = nullptr;
 
@@ -22,7 +28,8 @@ lemlib::Pose odomSpeed(0, 0, 0); // the speed of the robot
 lemlib::Pose odomLocalSpeed(0, 0, 0); // the local speed of the robot
 
 
-
+int fieldLength = 114; 
+int fieldWidth = 114; 
 int particleNumber = 100; 
 float prevVertical = 0;
 float prevVertical1 = 0;
@@ -198,24 +205,47 @@ void lemlib::update() {
     double changeX = (localY * sin(avgHeading) + localX * -cos(avgHeading));
     double changeY = (localY * cos(avgHeading) + localX * sin(avgHeading));
 
-    for (int i =0; i < particleNumber; i++) {
-        //get the current particle
-        Particle p = particles[i];
+        //CALCULATE DISTANCE TRAVELED
+        double distanceTraveled = sqrt(changeX * changeX + changeY * changeY);
 
-        //update the particle's position based on the change in x and y
-        double newX = p.x + changeX;
-        double newY = p.y + changeY;
+            //based on this distance has a STDEV 
+            double stdDev = abs(distanceTraveled) * 0.02 + 0.10; 
+            //gaussian distribution 
 
-        //NOTE: change how this randomness is done because it's a bit complicated & muy importante
-        //otherwordly powers
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_real_distribution<> distr(0.1, 1.0);
-        double random = distr(gen);
-        newX = newX += random; // add random noise to x position
 
-    }
+            for (int i =0; i < particleNumber; i++) {
+                //get the current particle
+                Particle p = particles[i];
 
+                //update the particle's position based on the change in x and y
+                double newX = p.x + changeX;
+                double newY = p.y + changeY;
+
+                //NOTE: change how this randomness is done because it's a bit complicated & muy importante
+                //otherwordly powers  
+                    
+                std::normal_distribution<double> distribution(0.0, stdDev);
+                double noiseX = distribution (gen); 
+                double noiseY = distribution (gen); 
+
+                newX += noiseX; 
+                newY += noiseY;
+                particles[i] = Particle(newX, newY, p.theta + deltaHeading, 1.0/particleNumber); 
+            }
+
+
+    //SENSOR UPDATE
+        //get the current sensor values from the distance sensor 
+        double leftSensorValue = leftSensor.get(); 
+        double rightSensorValue = rightSensor.get(); 
+        double frontSensorValue = frontSensor.get(); 
+        double backSensorValue = backSensor.get();
+        
+        //would depend on the theta though 
+        //calculated the expected sensor value based on the particles posiiton though 
+        //compare them?
+
+        //graph it on a gaussian 
 
     // calculate global x and y
 
@@ -224,7 +254,6 @@ void lemlib::update() {
     // odomPose.x += localX * -cos(avgHeading);
     // odomPose.y += localX * sin(avgHeading);
     // odomPose.theta = heading;
-
 
     // calculate speed
     odomSpeed.x = ema((odomPose.x - prevPose.x) / 0.01, odomSpeed.x, 0.95);

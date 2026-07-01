@@ -4,7 +4,7 @@
  * Contains common definitions and header files used throughout your PROS
  * project.
  *
- * \copyright Copyright (c) 2017-2023, Purdue University ACM SIGBots.
+ * \copyright Copyright (c) 2017-2024, Purdue University ACM SIGBots.
  * All rights reserved.
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -24,6 +24,8 @@
  * E_CONTROLLER_MASTER is pedantically correct within the PROS styleguide, but
  * not convenient for most student programmers.
  */
+// #include "intake.h"
+#include "pros/optical.hpp"
 #define PROS_USE_SIMPLE_NAMES
 
 /**
@@ -78,3 +80,56 @@ void opcontrol(void);
 #endif
 
 #endif  // _PROS_MAIN_H_
+
+#include "pros/adi.hpp"
+#include "pros/misc.h"
+#include "pros/motors.hpp"
+#include "lemlib/api.hpp"
+
+extern pros::Controller controller;
+
+// motor groups
+extern pros::MotorGroup leftMotors; // left motor group - ports 3 (reversed), 4, 5 (reversed)
+extern pros::MotorGroup rightMotors; // right motor group - ports 6, 7, 9 (reversed)
+
+extern lemlib::Drivetrain drivetrain;
+
+extern pros::Imu imu;
+
+
+extern pros::Rotation horizontal_encoder; //odom sensor
+extern lemlib::TrackingWheel horizontal_tracking_wheel;
+
+extern pros::Rotation vertical_encoder; //odom sensor
+extern lemlib::TrackingWheel vertical_tracking_wheel;
+
+extern lemlib::OdomSensors sensors;
+
+// Dummy PID settings — required by Chassis constructor, but not used for arcade
+extern lemlib::ControllerSettings lateral;
+
+extern lemlib::ControllerSettings angular;
+
+extern lemlib::ExpoDriveCurve throttle;
+extern lemlib::ExpoDriveCurve steer;
+
+// Chassis with dummy settings
+extern lemlib::Chassis chassis;
+
+extern pros::adi::DigitalOut descore;
+
+//Scraper
+extern pros::adi::DigitalOut scraper;
+extern pros::adi::DigitalOut wing;
+extern pros::adi::DigitalOut horLift;
+extern pros::adi::DigitalOut verLift;
+
+
+
+extern bool hoodActivated;
+
+//distance sensors
+extern pros::Distance frontSensor; 
+extern pros::Distance leftSensor;
+extern pros::Distance rightSensor;
+extern pros::Distance backSensor;
